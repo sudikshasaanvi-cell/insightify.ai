@@ -3,5 +3,5 @@ uvicorn[standard]==0.29.0
 python-multipart==0.0.9
 pypdf==4.2.0
 sentence-transformers==2.7.0
-faiss-cpu==1.8.0
+faiss-cpu
 numpy==1.26.4
