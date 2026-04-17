@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Insighify AI – Smart Study Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  --bg: #07050f;
+  --surface: #110e20;
+  --card: #1a1630;
+  --border: rgba(255,255,255,0.08);
+  --text: #f0ecff;
+  --muted: #8a84a8;
+  --p1: #a855f7;   /* violet */
+  --p2: #6366f1;   /* indigo */
+  --p3: #ec4899;   /* pink */
+  --p4: #06b6d4;   /* cyan */
+  --grad: linear-gradient(135deg, var(--p1), var(--p2), var(--p3));
+  --grad2: linear-gradient(135deg, var(--p4), var(--p2));
+  --shadow: 0 8px 40px rgba(168,85,247,0.18);
+  --radius: 18px;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--p1); border-radius: 99px; }
+
+/* ===== BACKGROUND ORBS ===== */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+  animation: float 12s ease-in-out infinite alternate;
+}
+.orb-1 { width: 500px; height: 500px; background: rgba(168,85,247,0.15); top: -150px; left: -150px; }
+.orb-2 { width: 400px; height: 400px; background: rgba(99,102,241,0.12); top: 40%; right: -100px; animation-delay: -4s; }
+.orb-3 { width: 350px; height: 350px; background: rgba(236,72,153,0.10); bottom: 10%; left: 20%; animation-delay: -8s; }
+@keyframes float { from { transform: translateY(0) scale(1); } to { transform: translateY(-40px) scale(1.08); } }
+
+/* ===== NAV ===== */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 2.5rem;
+  background: rgba(7,5,15,0.75);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 1.3rem;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.nav-links { display: flex; gap: 2rem; }
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+
+/* ===== SECTIONS ===== */
+section { position: relative; z-index: 1; }
+
+/* ===== HERO ===== */
+#hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 6rem 1.5rem 4rem;
+  gap: 1.5rem;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  background: rgba(168,85,247,0.15);
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 99px;
+  font-size: 0.8rem;
+  color: var(--p1);
+  font-weight: 500;
+  animation: fadeUp 0.6s ease both;
+}
+h1 {
+  font-family: var(--font-head);
+  font-size: clamp(2.8rem, 8vw, 6rem);
+  font-weight: 800;
+  line-height: 1.05;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fadeUp 0.7s 0.1s ease both;
+}
+.hero-sub {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--muted);
+  max-width: 520px;
+  line-height: 1.6;
+  font-weight: 300;
+  animation: fadeUp 0.7s 0.2s ease both;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  padding: 0.85rem 2rem;
+  background: var(--grad);
+  color: #fff;
+  border: none;
+  border-radius: 99px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+  box-shadow: var(--shadow);
+  animation: fadeUp 0.7s 0.3s ease both;
+}
+.btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 12px 50px rgba(168,85,247,0.35); }
+.btn-primary:active { transform: scale(0.97); }
+
+.hero-stats {
+  display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;
+  margin-top: 1rem;
+  animation: fadeUp 0.7s 0.4s ease both;
+}
+.stat { text-align: center; }
+.stat-num { font-family: var(--font-head); font-size: 1.6rem; font-weight: 800; background: var(--grad2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.stat-lbl { font-size: 0.78rem; color: var(--muted); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===== CARD BASE ===== */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+  transition: box-shadow 0.3s, border-color 0.3s, transform 0.3s;
+}
+.card:hover { box-shadow: var(--shadow); border-color: rgba(168,85,247,0.25); transform: translateY(-2px); }
+
+/* ===== SECTION WRAPPER ===== */
+.section-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem;
+}
+.section-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+.section-title span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.section-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 2.5rem; font-weight: 300; }
+
+/* ===== UPLOAD SECTION ===== */
+#upload-zone {
+  border: 2px dashed rgba(168,85,247,0.35);
+  border-radius: var(--radius);
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s, background 0.3s;
+  background: rgba(168,85,247,0.04);
+}
+#upload-zone:hover, #upload-zone.drag-over {
+  border-color: var(--p1);
+  background: rgba(168,85,247,0.09);
+}
+#upload-zone .up-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+#upload-zone p { color: var(--muted); font-size: 0.9rem; }
+#upload-zone strong { color: var(--text); }
+#file-input { display: none; }
+
+.file-badge {
+  display: none;
+  align-items: center; gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(6,182,212,0.12);
+  border: 1px solid rgba(6,182,212,0.3);
+  border-radius: 12px;
+  color: var(--p4);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.file-badge.visible { display: flex; }
+.file-badge .close-btn { margin-left: auto; cursor: pointer; opacity: 0.6; }
+.file-badge .close-btn:hover { opacity: 1; }
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+#toast.success { background: rgba(6,182,212,0.2); border: 1px solid rgba(6,182,212,0.4); color: var(--p4); }
+#toast.error   { background: rgba(236,72,153,0.2); border: 1px solid rgba(236,72,153,0.4); color: var(--p3); }
+
+/* ===== CHAT SECTION ===== */
+#chat-box {
+  height: 420px;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.msg { display: flex; gap: 0.75rem; align-items: flex-start; animation: fadeUp 0.3s ease both; }
+.msg.user { flex-direction: row-reverse; }
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; flex-shrink: 0;
+}
+.avatar.ai { background: var(--grad); }
+.avatar.user { background: linear-gradient(135deg, var(--p3), var(--p1)); }
+.bubble {
+  max-width: 75%;
+  padding: 0.8rem 1.1rem;
+  border-radius: 16px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.msg.user .bubble { background: linear-gradient(135deg, rgba(168,85,247,0.25), rgba(99,102,241,0.25)); border: 1px solid rgba(168,85,247,0.25); border-top-right-radius: 4px; }
+.msg.ai .bubble   { background: var(--card); border: 1px solid var(--border); border-top-left-radius: 4px; }
+.source-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+.source-chip {
+  font-size: 0.72rem; padding: 0.2rem 0.6rem;
+  background: rgba(6,182,212,0.12); border: 1px solid rgba(6,182,212,0.25);
+  color: var(--p4); border-radius: 99px;
+}
+
+.chat-input-row {
+  display: flex; gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+}
+.chat-input-row input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input-row input:focus { border-color: var(--p1); }
+.chat-input-row input::placeholder { color: var(--muted); }
+.send-btn {
+  padding: 0.7rem 1.2rem;
+  background: var(--grad);
+  color: #fff; border: none; border-radius: 12px;
+  cursor: pointer; font-size: 1.1rem;
+  transition: transform 0.15s, filter 0.15s;
+}
+.send-btn:hover { transform: scale(1.06); filter: brightness(1.1); }
+
+/* ===== THINKING ANIMATION ===== */
+.thinking { display: flex; align-items: center; gap: 5px; padding: 0.5rem 0; }
+.thinking span {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--p1);
+  animation: bounce 1.2s infinite ease-in-out;
+}
+.thinking span:nth-child(2) { animation-delay: 0.2s; background: var(--p2); }
+.thinking span:nth-child(3) { animation-delay: 0.4s; background: var(--p3); }
+@keyframes bounce { 0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; } 40% { transform: scale(1.1); opacity: 1; } }
+
+/* ===== FEATURES SECTION ===== */
+.feature-btns {
+  display: flex; flex-wrap: wrap; gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+.feat-btn {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.65rem 1.2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.feat-btn:hover { border-color: var(--p1); color: var(--p1); transform: translateY(-1px); }
+.feat-btn.active { background: rgba(168,85,247,0.2); border-color: var(--p1); color: var(--p1); }
+
+#feature-output { min-height: 100px; }
+.output-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  animation: fadeUp 0.4s ease both;
+}
+.output-card h3 { font-family: var(--font-head); font-size: 1.05rem; font-weight: 700; margin-bottom: 1.2rem; }
+.output-card h3 span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+/* Summary bullets */
+.summary-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+.summary-list li { display: flex; gap: 0.75rem; align-items: flex-start; font-size: 0.9rem; line-height: 1.55; color: var(--muted); }
+.summary-list li::before { content: "✦"; color: var(--p1); flex-shrink: 0; margin-top: 2px; }
+
+/* Questions list */
+.q-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.q-item {
+  padding: 0.8rem 1rem;
+  background: rgba(99,102,241,0.08);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 10px;
+  font-size: 0.9rem; color: var(--muted);
+  counter-increment: q;
+}
+
+/* MCQ */
+.mcq-list { display: flex; flex-direction: column; gap: 1.2rem; }
+.mcq-item { font-size: 0.9rem; }
+.mcq-q { font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+.mcq-options { display: flex; flex-direction: column; gap: 0.3rem; }
+.mcq-opt {
+  padding: 0.45rem 0.9rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.88rem;
+}
+.mcq-opt:hover { border-color: var(--p1); color: var(--p1); }
+.mcq-opt.correct { background: rgba(6,182,212,0.15); border-color: var(--p4); color: var(--p4); }
+.mcq-opt.wrong { background: rgba(236,72,153,0.12); border-color: var(--p3); color: var(--p3); }
+
+/* Flashcards */
+.fc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.fc-card {
+  perspective: 800px; height: 150px; cursor: pointer;
+}
+.fc-inner {
+  width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+}
+.fc-card.flipped .fc-inner { transform: rotateY(180deg); }
+.fc-front, .fc-back {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem; text-align: center;
+  font-size: 0.85rem;
+}
+.fc-front { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.25); color: var(--text); font-weight: 500; }
+.fc-back { background: rgba(6,182,212,0.12); border: 1px solid rgba(6,182,212,0.25); color: var(--p4); transform: rotateY(180deg); }
+
+/* Topics pills */
+.topic-pills { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.topic-pill {
+  padding: 0.4rem 0.9rem;
+  border-radius: 99px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+/* ===== INSIGHTS SECTION ===== */
+.insights-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.25rem; }
+.insight-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.insight-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.ic-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+.ic-title { font-family: var(--font-head); font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; }
+.ic-body { font-size: 0.85rem; color: var(--muted); line-height: 1.55; }
+.ic-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+.ic-list li { font-size: 0.83rem; color: var(--muted); padding-left: 1rem; position: relative; }
+.ic-list li::before { content: "→"; position: absolute; left: 0; color: var(--p1); }
+
+/* ===== LOADING SPINNER ===== */
+.spinner {
+  display: inline-block;
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== FOOTER ===== */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  position: relative; z-index: 1;
+}
+footer span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  nav { padding: 0.9rem 1.25rem; }
+  .nav-links { display: none; }
+  .section-wrap { padding: 3rem 1rem; }
+  .feature-btns { gap: 0.5rem; }
+  .feat-btn { font-size: 0.8rem; padding: 0.55rem 0.9rem; }
+  .fc-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- BG orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">✦ Insighify AI</div>
+  <div class="nav-links">
+    <a href="#upload-sec">Upload</a>
+    <a href="#chat-sec">Chat</a>
+    <a href="#features-sec">Features</a>
+    <a href="#insights-sec">Insights</a>
+  </div>
+</nav>
+
+<!-- ====== HERO ====== -->
+<section id="hero">
+  <div class="badge">✨ AI-Powered Study Assistant</div>
+  <h1>INSIGHIFY AI</h1>
+  <p class="hero-sub">Turn your study materials into smart insights, quizzes, flashcards and more — instantly.</p>
+  <a href="#upload-sec" class="btn-primary">📄 Upload PDF &nbsp;→</a>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">⚡</div><div class="stat-lbl">Instant Answers</div></div>
+    <div class="stat"><div class="stat-num">🧠</div><div class="stat-lbl">Smart Summaries</div></div>
+    <div class="stat"><div class="stat-num">🃏</div><div class="stat-lbl">Auto Flashcards</div></div>
+    <div class="stat"><div class="stat-num">📊</div><div class="stat-lbl">Study Insights</div></div>
+  </div>
+</section>
+
+<!-- ====== UPLOAD SECTION ====== -->
+<section id="upload-sec">
+  <div class="section-wrap">
+    <h2 class="section-title"><span>Upload</span> Your PDF</h2>
+    <p class="section-sub">Drop your textbook, notes, or any study material — we'll do the rest.</p>
+
+    <div id="upload-zone" onclick="document.getElementById('file-input').click()"
+         ondragover="event.preventDefault(); this.classList.add('drag-over')"
+         ondragleave="this.classList.remove('drag-over')"
+         ondrop="handleDrop(event)">
+      <div class="up-icon">📂</div>
+      <p><strong>Click to browse</strong> or drag & drop here</p>
+      <p style="margin-top:0.4rem;font-size:0.78rem;">PDF files only · Up to 50MB</p>
+    </div>
+    <input type="file" id="file-input" accept=".pdf" onchange="handleFileSelect(this)" />
+
+    <div id="file-badge" class="file-badge">
+      <span>📄</span>
+      <span id="file-name">file.pdf</span>
+      <span class="close-btn" onclick="clearFile()">✕</span>
+    </div>
+
+    <div style="margin-top:1.5rem; display:flex; gap:1rem; flex-wrap:wrap;">
+      <button class="btn-primary" id="upload-btn" onclick="uploadPDF()" style="font-size:0.9rem; padding:0.7rem 1.5rem;">
+        ⬆ Upload &amp; Process
+      </button>
+      <div id="upload-status" style="color:var(--muted); font-size:0.85rem; display:flex; align-items:center; gap:0.5rem;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== CHAT SECTION ====== -->
+<section id="chat-sec">
+  <div class="section-wrap">
+    <h2 class="section-title"><span>Ask</span> Anything</h2>
+    <p class="section-sub">Chat with your document — ask questions and get sourced answers.</p>
+
+    <div class="card" style="overflow:hidden;">
+      <div id="chat-box">
+        <div class="msg ai">
+          <div class="avatar ai">🤖</div>
+          <div class="bubble">Hello! Upload a PDF and I'll answer any questions you have about it. 📚</div>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input id="chat-input" type="text" placeholder="Ask a question about your document…" onkeydown="if(event.key==='Enter') sendMessage()" />
+        <button class="send-btn" onclick="sendMessage()">➤</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== FEATURES SECTION ====== -->
+<section id="features-sec">
+  <div class="section-wrap">
+    <h2 class="section-title"><span>AI</span> Features</h2>
+    <p class="section-sub">One click to unlock all these smart study tools.</p>
+
+    <div class="feature-btns">
+      <button class="feat-btn" id="btn-summary"    onclick="loadFeature('summary')">📚 Summarize</button>
+      <button class="feat-btn" id="btn-questions"  onclick="loadFeature('questions')">❓ Key Questions</button>
+      <button class="feat-btn" id="btn-quiz"       onclick="loadFeature('quiz')">🧪 Quiz Me</button>
+      <button class="feat-btn" id="btn-flashcards" onclick="loadFeature('flashcards')">🃏 Flashcards</button>
+      <button class="feat-btn" id="btn-topics"     onclick="loadFeature('topics')">🏷 Topics</button>
+    </div>
+
+    <div id="feature-output">
+      <div style="color:var(--muted); font-size:0.9rem; text-align:center; padding:2rem;">
+        Upload a PDF then click a feature above ☝️
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== INSIGHTS SECTION ====== -->
+<section id="insights-sec">
+  <div class="section-wrap">
+    <h2 class="section-title"><span>Study</span> Insights</h2>
+    <p class="section-sub">Personalized breakdown of your document's learning landscape.</p>
+
+    <div class="insights-grid" id="insights-grid">
+      <div class="insight-card" style="grid-column:1/-1; text-align:center; color:var(--muted); padding:3rem; font-size:0.9rem;">
+        Upload &amp; process a PDF to see your personalized study insights 📊
+      </div>
+    </div>
+
+    <div style="margin-top:1.5rem; text-align:center;">
+      <button class="btn-primary" id="insights-btn" onclick="loadInsights()" style="font-size:0.88rem; padding:0.7rem 1.5rem;">
+        🔍 Generate Insights
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  Built with ❤️ · <span>Insighify AI</span> · Hackathon Edition 🚀
+</footer>
+
+<script>
+// ===== CONFIG =====
+const API = 'http://localhost:8000'; // Change to your backend URL
+
+// ===== STATE =====
+let selectedFile = null;
+let pdfUploaded = false;
+
+// ===== TOAST =====
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  setTimeout(() => el.className = '', 3000);
+}
+
+// ===== FILE HANDLING =====
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.pdf')) setFile(file);
+  else toast('Please drop a PDF file.', 'error');
+}
+
+function handleFileSelect(input) {
+  if (input.files[0]) setFile(input.files[0]);
+}
+
+function setFile(file) {
+  selectedFile = file;
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-badge').classList.add('visible');
+}
+
+function clearFile() {
+  selectedFile = null;
+  pdfUploaded = false;
+  document.getElementById('file-badge').classList.remove('visible');
+  document.getElementById('file-input').value = '';
+}
+
+// ===== UPLOAD PDF =====
+async function uploadPDF() {
+  if (!selectedFile) { toast('Please select a PDF first.', 'error'); return; }
+
+  const btn = document.getElementById('upload-btn');
+  const status = document.getElementById('upload-status');
+
+  btn.innerHTML = '<span class="spinner"></span> Processing…';
+  btn.disabled = true;
+  status.innerHTML = '⚡ Indexing your document…';
+
+  try {
+    const form = new FormData();
+    form.append('file', selectedFile);
+
+    const res = await fetch(`${API}/upload`, { method: 'POST', body: form });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.detail || 'Upload failed');
+
+    pdfUploaded = true;
+    status.innerHTML = `✅ ${data.pages} pages · ${data.chunks} chunks indexed`;
+    toast(`✅ "${data.filename}" uploaded successfully!`);
+    addMessage('ai', `📄 Got it! I've indexed **${data.filename}** (${data.pages} pages). Ask me anything!`);
+  } catch (err) {
+    status.innerHTML = '';
+    toast(`Upload failed: ${err.message}`, 'error');
+  } finally {
+    btn.innerHTML = '⬆ Upload & Process';
+    btn.disabled = false;
+  }
+}
+
+// ===== CHAT =====
+function addMessage(role, text, sources = []) {
+  const box = document.getElementById('chat-box');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = `avatar ${role}`;
+  avatar.textContent = role === 'ai' ? '🤖' : '🧑';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  if (sources.length) {
+    const chips = document.createElement('div');
+    chips.className = 'source-chips';
+    sources.forEach((s, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'source-chip';
+      chip.textContent = `Source ${i + 1}`;
+      chip.title = s;
+      chips.appendChild(chip);
+    });
+    bubble.appendChild(chips);
+  }
+
+  div.appendChild(avatar);
+  div.appendChild(bubble);
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function addThinking() {
+  const box = document.getElementById('chat-box');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.id = 'thinking-msg';
+  div.innerHTML = `<div class="avatar ai">🤖</div><div class="bubble"><div class="thinking"><span></span><span></span><span></span></div></div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function removeThinking() {
+  const t = document.getElementById('thinking-msg');
+  if (t) t.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const q = input.value.trim();
+  if (!q) return;
+  if (!pdfUploaded) { toast('Please upload a PDF first!', 'error'); return; }
+
+  addMessage('user', q);
+  input.value = '';
+  addThinking();
+
+  try {
+    const res = await fetch(`${API}/ask?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    removeThinking();
+    if (!res.ok) throw new Error(data.detail);
+    addMessage('ai', data.answer, data.sources || []);
+  } catch (err) {
+    removeThinking();
+    addMessage('ai', `❌ Error: ${err.message}`);
+  }
+}
+
+// ===== FEATURES =====
+const colors = [
+  ['#a855f7','rgba(168,85,247,0.15)'],
+  ['#6366f1','rgba(99,102,241,0.15)'],
+  ['#ec4899','rgba(236,72,153,0.12)'],
+  ['#06b6d4','rgba(6,182,212,0.12)'],
+  ['#f59e0b','rgba(245,158,11,0.12)'],
+];
+
+function setActiveFeat(name) {
+  document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`btn-${name}`)?.classList.add('active');
+}
+
+async function loadFeature(name) {
+  if (!pdfUploaded) { toast('Upload a PDF first!', 'error'); return; }
+  setActiveFeat(name);
+
+  const out = document.getElementById('feature-output');
+  out.innerHTML = `<div style="padding:2rem; text-align:center"><div class="thinking" style="justify-content:center"><span></span><span></span><span></span></div><p style="color:var(--muted);margin-top:0.75rem;font-size:0.88rem">Thinking…</p></div>`;
+
+  try {
+    const res = await fetch(`${API}/${name}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail);
+
+    if (name === 'summary')    renderSummary(data.summary);
+    if (name === 'questions')  renderQuestions(data.questions);
+    if (name === 'quiz')       renderQuiz(data.quiz);
+    if (name === 'flashcards') renderFlashcards(data.flashcards);
+    if (name === 'topics')     renderTopics(data.topics);
+  } catch (err) {
+    out.innerHTML = `<div class="output-card" style="color:var(--p3)">❌ ${err.message}</div>`;
+  }
+}
+
+function renderSummary(items) {
+  const out = document.getElementById('feature-output');
+  const ul = items.map(i => `<li>${i}</li>`).join('');
+  out.innerHTML = `<div class="output-card"><h3><span>📚 Summary</span></h3><ul class="summary-list">${ul}</ul></div>`;
+}
+
+function renderQuestions(items) {
+  const out = document.getElementById('feature-output');
+  const qs = items.map((q,i) => `<div class="q-item"><strong>${i+1}.</strong> ${q}</div>`).join('');
+  out.innerHTML = `<div class="output-card"><h3><span>❓ Important Questions</span></h3><div class="q-list">${qs}</div></div>`;
+}
+
+function renderQuiz(items) {
+  const out = document.getElementById('feature-output');
+  let html = `<div class="output-card"><h3><span>🧪 Quiz</span></h3><div class="mcq-list">`;
+  items.forEach((mcq, qi) => {
+    const opts = mcq.options.map(o => `<div class="mcq-opt" onclick="checkAnswer(this,'${o.replace(/'/g,"\\'")}','${mcq.answer.replace(/'/g,"\\'")}',${qi})">${o}</div>`).join('');
+    html += `<div class="mcq-item"><div class="mcq-q">Q${qi+1}. ${mcq.question}</div><div class="mcq-options" id="mcq-${qi}">${opts}</div></div>`;
+  });
+  html += `</div></div>`;
+  out.innerHTML = html;
+}
+
+function checkAnswer(el, chosen, correct, qi) {
+  const container = document.getElementById(`mcq-${qi}`);
+  if (container.dataset.answered) return;
+  container.dataset.answered = '1';
+  container.querySelectorAll('.mcq-opt').forEach(opt => {
+    if (opt.textContent.trim() === correct) opt.classList.add('correct');
+    else if (opt.textContent.trim() === chosen) opt.classList.add('wrong');
+    opt.style.pointerEvents = 'none';
+  });
+}
+
+function renderFlashcards(items) {
+  const out = document.getElementById('feature-output');
+  const cards = items.map(c => `
+    <div class="fc-card" onclick="this.classList.toggle('flipped')">
+      <div class="fc-inner">
+        <div class="fc-front">❓ ${c.question}</div>
+        <div class="fc-back">💡 ${c.answer}</div>
+      </div>
+    </div>`).join('');
+  out.innerHTML = `<div class="output-card"><h3><span>🃏 Flashcards</span> <span style="color:var(--muted);font-weight:400;font-size:0.8rem">— click to flip</span></h3><div class="fc-grid">${cards}</div></div>`;
+}
+
+function renderTopics(items) {
+  const out = document.getElementById('feature-output');
+  const pills = items.map((t,i) => {
+    const [col, bg] = colors[i % colors.length];
+    return `<span class="topic-pill" style="background:${bg};border:1px solid ${col}30;color:${col}">${t}</span>`;
+  }).join('');
+  out.innerHTML = `<div class="output-card"><h3><span>🏷 Key Topics</span></h3><div class="topic-pills">${pills}</div></div>`;
+}
+
+// ===== INSIGHTS =====
+async function loadInsights() {
+  if (!pdfUploaded) { toast('Upload a PDF first!', 'error'); return; }
+
+  const btn = document.getElementById('insights-btn');
+  btn.innerHTML = '<span class="spinner"></span> Analyzing…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API}/topics`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail);
+
+    const grid = document.getElementById('insights-grid');
+    const topicPills = data.topics.map((t,i) => {
+      const [col, bg] = colors[i % colors.length];
+      return `<span class="topic-pill" style="background:${bg};border:1px solid ${col}30;color:${col};font-size:0.8rem">${t}</span>`;
+    }).join('');
+
+    const weakList = data.weak_areas.map(w => `<li>${w}</li>`).join('');
+    const suggList = data.study_suggestions.map(s => `<li>${s}</li>`).join('');
+
+    grid.innerHTML = `
+      <div class="insight-card">
+        <div class="ic-icon">🏷</div>
+        <div class="ic-title">Key Topics</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem">${topicPills}</div>
+      </div>
+      <div class="insight-card">
+        <div class="ic-icon">⚠️</div>
+        <div class="ic-title">Areas to Review</div>
+        <ul class="ic-list">${weakList}</ul>
+      </div>
+      <div class="insight-card">
+        <div class="ic-icon">💡</div>
+        <div class="ic-title">Study Suggestions</div>
+        <ul class="ic-list">${suggList}</ul>
+      </div>
+    `;
+    toast('✅ Insights generated!');
+  } catch (err) {
+    toast(`Error: ${err.message}`, 'error');
+  } finally {
+    btn.innerHTML = '🔍 Generate Insights';
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
